@@ -5,9 +5,11 @@
 @layer base {
   body {
     @apply bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark;
+    transition: background-color 0.5s ease, color 0.5s ease;
   }
 
-  input, textarea {
+  input,
+  textarea {
     @apply bg-background-light text-text-light;
   }
 }
