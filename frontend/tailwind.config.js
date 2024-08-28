@@ -12,6 +12,14 @@ module.exports = {
           light: "#131419",
           dark: "#ffffff",
         },
+        cardBg: {
+          light: "#f3f4f6",
+          dark: "#28292e",
+        },
+        cardText: {
+          light: "#131419",
+          dark: "#f3f4f6",
+        },
       },
     },
   },

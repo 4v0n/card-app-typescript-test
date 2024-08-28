@@ -8,8 +8,14 @@
     transition: background-color 0.5s ease, color 0.5s ease;
   }
 
+  .card {
+    @apply bg-cardBg-light dark:bg-cardBg-dark text-cardText-light dark:text-cardText-dark;
+    transition: background-color 0.5s ease, color 0.5s ease;
+  }
+
   input,
   textarea {
-    @apply bg-background-light text-text-light;
+    @apply bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark;
+    transition: background-color 0.5s ease, color 0.5s ease;
   }
 }

@@ -38,7 +38,7 @@ export default function NavBar() {
         onClick={toggleDarkMode}
         className="m-3 p-4 text-xl bg-gray-300 hover:bg-gray-400 rounded-md font-medium text-black"
       >
-        {darkMode ? "light Mode" : "Dark Mode"}
+        {darkMode ? "Light Mode" : "Dark Mode"}
       </button>
     </nav>
   );
