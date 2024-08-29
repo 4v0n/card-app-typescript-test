@@ -1,7 +1,7 @@
 import { Entry } from "@prisma/client";
+import axios, { AxiosError } from "axios";
 import Prisma from "../src/db";
 import { server } from "../src/server";
-import axios from "axios";
 
 describe("server test", () => {
   describe("Schema tests", () => {
@@ -99,17 +99,30 @@ describe("server test", () => {
     it("GET /get/:id should return a single specific entry", async () => {
       const entry = await Prisma.entry.findFirst({});
       if (!entry) fail("Entry not found.");
-      
+
       // convert date fields to ISO string for comparison
       const expectedEntry = {
         ...entry,
         created_at: entry.created_at.toISOString(),
         scheduled_date: entry.scheduled_date.toISOString(),
-      }
+      };
 
-      const res = (await axios.get(`${url}/get/${entry.id}`));
+      const res = await axios.get(`${url}/get/${entry.id}`);
       expect(res.status).toBe(200);
       expect(res.data).toMatchObject(expectedEntry);
+    });
+
+    it("GET /get/:id should not return an entry with invalid id", async () => {
+      expect.assertions(2);
+      try {
+        await axios.get(`${url}/get/54321`);
+        fail("Request should not have succeded");
+      } catch (err) {
+        const aErr = err as AxiosError;
+
+        expect(aErr.response).toBeDefined();
+        expect(aErr.response?.status).toBe(500);
+      }
     });
 
     it("POST /create/ should create a new entry", async () => {
@@ -123,19 +136,49 @@ describe("server test", () => {
       expect(res.status).toBe(200);
       expect(res.data).toHaveProperty("id");
 
-      const entry = await Prisma.entry.findUnique({where: {id: res.data.id}});
+      const entry = await Prisma.entry.findUnique({ where: { id: res.data.id } });
       if (!entry) fail("Entry not found.");
     });
 
-    it("DELETE /delete/:id should delete an entry", async () =>{
+    it("POST /create/ should not create a new entry with invalid request", async () => {
+      expect.assertions(2);
+      try {
+        const res = await axios.post(`${url}/create/`, {
+          description: "Description3",
+          scheduled_date: new Date(),
+          created_at: new Date(),
+        });
+        fail("Request should not have succeded");
+      } catch (err) {
+        const aErr = err as AxiosError;
+
+        expect(aErr.response).toBeDefined();
+        expect(aErr.response?.status).toBe(500);
+      }
+    });
+
+    it("DELETE /delete/:id should delete an entry", async () => {
       const entry = await Prisma.entry.findFirst({});
       if (!entry) fail("Entry not found.");
 
       const res = await axios.delete(`${url}/delete/${entry.id}`);
       expect(res.status).toBe(200);
 
-      const searchedEntry = await Prisma.entry.findUnique({where: {id: entry.id}});
+      const searchedEntry = await Prisma.entry.findUnique({ where: { id: entry.id } });
       expect(searchedEntry).toBeNull();
+    });
+
+    it("DELETE /delete/:id should not delete an entry that does not exist", async () => {
+      expect.assertions(2);
+      try {
+        const res = await axios.delete(`${url}/delete/54321`);
+        fail("Request should not have succeded");
+      } catch (err) {
+        const aErr = err as AxiosError;
+
+        expect(aErr.response).toBeDefined();
+        expect(aErr.response?.status).toBe(500);
+      }
     });
 
     it("PUT /update/:id should update an entry", async () => {
@@ -144,15 +187,31 @@ describe("server test", () => {
 
       const res = await axios.put(`${url}/update/${entry.id}`, {
         title: "newTitle",
-        description: "newDescription"
+        description: "newDescription",
       });
       expect(res.status).toBe(200);
 
-      const searchedEntry = await Prisma.entry.findUnique({where: {id: entry.id}});
-      if (!searchedEntry) fail("Entry not found")
+      const searchedEntry = await Prisma.entry.findUnique({ where: { id: entry.id } });
+      if (!searchedEntry) fail("Entry not found");
 
       expect(searchedEntry.title).toBe("newTitle");
       expect(searchedEntry.description).toBe("newDescription");
+    });
+
+    it("PUT /update/:id should not update an entry that does not exist", async () => {
+      expect.assertions(2);
+      try {
+        const res = await axios.put(`${url}/update/54321`, {
+        title: "newTitle",
+        description: "newDescription",
+      });
+        fail("Request should not have succeded");
+      } catch (err) {
+        const aErr = err as AxiosError;
+
+        expect(aErr.response).toBeDefined();
+        expect(aErr.response?.status).toBe(500);
+      }
     });
   });
 });

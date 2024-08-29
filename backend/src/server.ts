@@ -33,9 +33,8 @@ server.post<{ Body: Entry }>("/create/", async (req, reply) => {
   try {
     const createdEntryData = await Prisma.entry.create({ data: req.body });
     reply.send(createdEntryData);
-  } catch (err) {
+  } catch {
     reply.status(500).send({ msg: "Error creating entry" });
-    console.log(err);
   }
 });
 
